@@ -1,0 +1,24 @@
+{
+  "name": "Exam Grader OMR",
+  "short_name": "OMR Grader",
+  "description": "An OMR sheet grading application that can work offline.",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#eceff1",
+  "theme_color": "#007bff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+
+

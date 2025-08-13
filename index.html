@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Answer Checker</title>
+    <link rel="stylesheet" href="style.css">
+    <script async src="opencv.js" onload="onOpenCvReady();"></script>
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <div id="activation-screen" style="display: none; /* Initially hidden */">
+    <div class="modal-content">
+        <h2>Application ကို Activate လုပ်ပါ</h2>
+        <p>ကျေးဇူးပြု၍ Activate PIN နံပါတ်ထည့်သွင်းပါ။</p>
+        <input type="password" id="pin-input" placeholder="PIN နံပါတ်">
+        <button id="activate-button">Activate လုပ်မည်</button>
+        <p id="activation-error" class="error-message"></p>
+    </div>
+</div>
+
+    <div id="config-screen" class="screen">
+        <div class="container">
+            <div class="content-area">
+                <h2>Answer Checker</h2>
+<p class="byline">by<br>🇲🇲Naw Hein Min Htet🇰🇷</p>
+
+
+                <div class="accordion">
+                    <button class="accordion-header active">
+                        <h3>သိမ်းထားသော အဖြေမှန်များ</h3>
+                    </button>
+                    <div class="accordion-panel show">
+    <div class="accordion-content"> 
+        <div class="form-group">
+            <label for="savedKeysDropdown">သိမ်းထားသော အဖြေမှန်ကို ရွေးပါ</label>
+            <select id="savedKeysDropdown"></select>
+        </div>
+        <div class="button-group">
+            <button id="loadKeyButton" class="action-button success-button">ဖွင့်မည်</button>
+            <button id="deleteKeyButton" class="action-button danger-button">ဖျက်မည်</button>
+        </div>
+    </div> </div>
+
+                </div>
+
+                <div id="key-preview-container" class="key-preview">
+                    </div>
+
+            </div>
+            
+            <div class="sticky-footer">
+                <div class="button-group">
+                    <button id="openNewKeyModalButton" class="action-button secondary-button">အဖြေမှန် အသစ်</button>
+                    <button id="viewResultsButton" class="action-button secondary-button">ရလဒ်များ</button>
+                    <button id="startScanButton" class="action-button success-button">အဖြေလွှာစစ်ရန်</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="scanner-screen" class="screen">
+        <div class="container">
+            <div class="content-area">
+                <canvas id="output-canvas"></canvas>
+                
+                <div class="status-bar">
+                    <div id="status">အသင့်အနေအထား။</div>
+                    <button id="openTuningModalButton" class="action-button" style="flex-grow: 0.5; display: none;">ချိန်ညှိရန်</button>
+                </div>
+
+
+                <div class="button-group" id="scan-actions">
+                    <button id="chooseFileButton" class="action-button success-button">ပုံဖိုင် (များ) ရွေးမည်</button>
+                </div>
+                <input type="file" id="fileInput" accept="image/*" style="display:none;" multiple>
+
+                <div id="save-result-container" style="display: none;">
+                    <hr><h3>ရလဒ်ကို သိမ်းဆည်းရန်</h3>
+                    <div class="form-group"><label for="studentName">ကျောင်းသား/သူ အမည်</label><input type="text" id="studentName" placeholder="ရလဒ်သိမ်းရန် အမည်ထည့်ပါ"></div>
+                    <button id="saveResultButton" class="action-button success-button">ရလဒ် သိမ်းမည်</button>
+                    <button id="nextImageButton" class="action-button secondary-button" style="margin-top:10px">နောက်တစ်ပုံသို့ ကျော်မည်</button>
+                </div>
+            </div>
+            <div class="sticky-footer">
+                <button id="backToConfigButtonScanner" class="action-button secondary-button">ပင်မစာမျက်နှာသို့ ပြန်သွားရန်</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="results-screen" class="screen">
+         <div class="container">
+            <div class="content-area">
+                <h2>သိမ်းဆည်းထားသော ရလဒ်များ</h2>
+                <div>
+                    <table id="results-table">
+                        <thead><tr><th>အမည်</th><th>ရမှတ်</th><th>ရက်စွဲ</th><th>လုပ်ဆောင်ချက်</th></tr></thead>
+                        <tbody id="results-table-body"></tbody>
+                    </table>
+                </div>
+                <button id="clearResultsButton" class="action-button danger-button" style="margin-top:15px;">ရလဒ်အားလုံးကို ဖျက်မည်</button>
+            </div>
+            <div class="sticky-footer">
+                <button id="backToConfigButton" class="action-button secondary-button">ပင်မစာမျက်နှာသို့ ပြန်သွားရန်</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="tuning-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <button id="closeTuningModalButton" class="close-button">&times;</button>
+            <h3>Layout & Grading ချိန်ညှိရန်</h3>
+            
+            <div class="slider-group">
+                <label for="headerRatioSlider">ခေါင်းစဉ်ပိုင်း အမြင့် (%)</label>
+                <div class="slider-container">
+                    <button class="adjust-btn" data-target="headerRatioSlider" data-action="decrement">-</button>
+                    <input type="range" id="headerRatioSlider" min="0" max="15" value="5.5" step="0.5">
+                    <button class="adjust-btn" data-target="headerRatioSlider" data-action="increment">+</button>
+                    <span id="headerRatioValue">5.5%</span>
+                </div>
+            </div>
+
+            <div class="slider-group">
+                <label for="numberColRatioSlider">အစဉ်နံပါတ်တိုင် အကျယ် (%)</label>
+                <div class="slider-container">
+                    <button class="adjust-btn" data-target="numberColRatioSlider" data-action="decrement">-</button>
+                    <input type="range" id="numberColRatioSlider" min="0" max="25" value="13.0" step="0.5">
+                    <button class="adjust-btn" data-target="numberColRatioSlider" data-action="increment">+</button>
+                    <span id="numberColRatioValue">13.0%</span>
+                </div>
+            </div>
+            <div class="slider-group">
+                <label for="strayMarkThreshold">​အမှတ်ခြစ် ကျော်လွန်မှု ကန့်သတ်ချက်:</label>
+                <div class="slider-container">
+                <button class="adjust-btn" data-target="strayMarkThreshold" data-action="decrement">-</button>
+    
+    <input type="range" id="strayMarkThreshold" min="0" max="0.5" value="0.1" step="0.01">
+                <button class="adjust-btn" data-target="strayMarkThreshold" data-action="increment">+</button>
+    <span id="strayMarkThresholdValue">0.1</span>
+</div>
+            </div>
+
+            <div class="slider-group">
+                <label for="rowHeightRatioSlider">အကြောင်းအလိုက် အမြင့် အချိုး (%)</label>
+                <div class="slider-container">
+                    <button class="adjust-btn" data-target="rowHeightRatioSlider" data-action="decrement">-</button>
+                    <input type="range" id="rowHeightRatioSlider" min="50" max="100" value="100" step="1">
+                    <button class="adjust-btn" data-target="rowHeightRatioSlider" data-action="increment">+</button>
+                    <span id="rowHeightRatioValue">100%</span>
+                </div>
+            </div>
+
+            <hr style="margin: 15px 0;">
+
+            <div class="slider-group">
+                <label for="fillThresholdSlider">အဖြေ သတ်မှတ်ရန် အနိမ့်ဆုံးဖြည့်မှု (%)</label>
+                <div class="slider-container">
+                    <button class="adjust-btn" data-target="fillThresholdSlider" data-action="decrement">-</button>
+                    <input type="range" id="fillThresholdSlider" min="5" max="100" value="15" step="1">
+                    <button class="adjust-btn" data-target="fillThresholdSlider" data-action="increment">+</button>
+                    <span id="fillThresholdValue">15%</span>
+                </div>
+            </div>
+
+            <div class="slider-group">
+                <label for="confidenceThresholdSlider">အဖြေ ကွဲပြားမှု (x)</label>
+                <div class="slider-container">
+                    <button class="adjust-btn" data-target="confidenceThresholdSlider" data-action="decrement">-</button>
+                    <input type="range" id="confidenceThresholdSlider" min="0.1" max="3.0" value="2.0" step="0.1">
+                    <button class="adjust-btn" data-target="confidenceThresholdSlider" data-action="increment">+</button>
+                    <span id="confidenceThresholdValue">2.0x</span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button id="confirmTuningButton" class="action-button secondary-button">ပိတ်မည်</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="new-key-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <button id="closeNewKeyModalButton" class="close-button">&times;</button>
+            <h3>အဖြေမှန် အသစ်သတ်မှတ်ရန်</h3>
+
+            <div class="form-group form-group-inline">
+                <label for="totalQuestionsInput">မေးခွန်း စုစုပေါင်း</label>
+                <input type="number" id="totalQuestionsInput" value="40" min="1" inputmode="numeric">
+            </div>
+            <div class="form-group form-group-inline">
+                <label for="answersPerQuestionInput">ရွေးချယ်စရာ အရေအတွက်</label>
+                <input type="number" id="answersPerQuestionInput" value="4" min="2" inputmode="numeric">
+            </div>
+            <div class="form-group form-group-inline">
+                <label for="pointsPerQuestion">တစ်ပုဒ်အတွက် အမှတ်</label>
+                <input type="number" id="pointsPerQuestion" value="2.5" min="0.1" step="0.1" inputmode="numeric">
+            </div>
+            
+            <hr>
+
+            <div class="form-group">
+                <label for="bulkKeyInput">အဖြေမှန်များကို စာကြောင်းဖြင့်ထည့်ရန် (ဥပမာ- 14231...)</label>
+                <textarea id="bulkKeyInput" rows="3"></textarea>
+            </div>
+            <button id="loadBulkKeyButton" class="action-button secondary-button" style="margin-bottom: 15px;">စာကြောင်းမှ အဖြေများဖြည့်ရန်</button>
+            
+            <div class="form-group">
+                <label id="answer-key-section-label">အဖြေမှန်များ</label>
+                <div id="answer-key-container"></div>
+            </div>
+
+            <hr>
+            
+            <div class="form-group form-group-inline">
+                <label for="newKeyNameInput">အမည်ဖြင့်သိမ်းရန်:</label>
+                <input type="text" id="newKeyNameInput" placeholder="ဥပမာ၊ EPS-TOPIK စာမေးပွဲ A">
+            </div>
+
+            <div class="button-group">
+                <button id="cancelNewKeyButton" type="button" class="action-button secondary-button">မလုပ်တော့ပါ</button>
+                <button id="saveNewKeyButton" class="action-button success-button">လက်ရှိ အဖြေမှန်ကို သိမ်းမည်</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
