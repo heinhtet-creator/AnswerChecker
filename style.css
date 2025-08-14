@@ -223,7 +223,7 @@ h3 { margin: 0; font-size: 1.1em; }
 
 /* The white pop-up box in the middle */
 .modal-content {
-    background-color: #ffff80;
+    background-color: #ffffff80;
     padding: 2rem;
     border-radius: 12px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
