@@ -484,18 +484,41 @@ function resetScannerView() {
 }
 
 // normalStartup function ကို ဒီလိုပြင်ပါ
+// 1. `normalStartup` function
 function normalStartup() {
-    // <<< NEW: Check for activation status first >>>
     if (localStorage.getItem('isActivated') === 'true') {
-        // Already activated, proceed as normal
         generateAnswerKeyInputs();
         populateSavedKeysDropdown();
         loadTuningSettings();
         history.replaceState({ screen: 'config-screen' }, '', '#config-screen');
         showScreen('config-screen', true);
     } else {
-        // Not activated, show the PIN screen
         document.getElementById('activation-screen').style.display = 'flex';
+        loadActivationHint();
+    }
+}
+// 2. `loadActivationHint` function အသစ်
+async function loadActivationHint() {
+    const hintContainer = document.getElementById('hint-container');
+    const hintCodeElement = document.getElementById('hint-code');
+    const pinInput = document.getElementById('pin-input');
+    const activateButton = document.getElementById('activate-button');
+    hintCodeElement.textContent = 'Hint ရယူနေသည်...';
+    hintContainer.style.display = 'block';
+    pinInput.disabled = true;
+    activateButton.disabled = true;
+    try {
+        const response = await fetch('/.netlify/functions/get-hint');
+        const data = await response.json();
+        if (response.ok) {
+            hintCodeElement.textContent = data.hint;
+            pinInput.disabled = false;
+            activateButton.disabled = false;
+        } else {
+            hintCodeElement.textContent = data.message || 'Error';
+        }
+    } catch (error) {
+        hintCodeElement.textContent = 'Hint ရယူ၍ မရပါ။';
     }
 }
 
@@ -655,39 +678,33 @@ allSelectors.newKeyModal.addEventListener('click', (e) => {
 // script.js (at the end with other event listeners)
 
 const activateButton = document.getElementById('activate-button');
+// 3. `activateButton` ရဲ့ Event Listener
+const activateButton = document.getElementById('activate-button');
 const pinInput = document.getElementById('pin-input');
 const activationError = document.getElementById('activation-error');
-
 activateButton.addEventListener('click', async () => {
     const pin = pinInput.value.trim();
     if (!pin) {
         activationError.textContent = 'PIN နံပါတ် ထည့်ပေးပါ။';
         return;
     }
-
     activateButton.textContent = 'စစ်ဆေးနေသည်...';
     activateButton.disabled = true;
     activationError.textContent = '';
-
     try {
         const response = await fetch('/.netlify/functions/activate', {
             method: 'POST',
             body: JSON.stringify({ pin: pin })
         });
-
         const data = await response.json();
-
-        if (data.success) {
-            // PIN is correct!
+        if (response.ok && data.success) {
             localStorage.setItem('isActivated', 'true');
-            alert('Activate လုပ်ခြင်း အောင်မြင်ပါသည်။');
-            window.location.reload(); // Reload the page to start the app
+            alert(data.message || 'Activate လုပ်ခြင်း အောင်မြင်ပါသည်။');
+            window.location.reload();
         } else {
-            // PIN is incorrect
             activationError.textContent = data.message || 'Activate PIN မမှန်ပါ။';
         }
     } catch (error) {
-        console.error('Activation error:', error);
         activationError.textContent = 'Error ဖြစ်နေပါသည်။ နောက်မှ ပြန်ကြိုးစားပါ။';
     } finally {
         activateButton.textContent = 'Activate လုပ်မည်';
