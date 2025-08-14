@@ -676,8 +676,6 @@ allSelectors.newKeyModal.addEventListener('click', (e) => {
 });
 
 // script.js (at the end with other event listeners)
-
-const activateButton = document.getElementById('activate-button');
 // 3. `activateButton` ရဲ့ Event Listener
 const activateButton = document.getElementById('activate-button');
 const pinInput = document.getElementById('pin-input');
