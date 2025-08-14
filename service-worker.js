@@ -1,6 +1,6 @@
 // service-worker.js
 
-const CACHE_NAME = 'omr-grader-cache-v1.1';
+const CACHE_NAME = 'omr-grader-cache-v1.2';
 // Offline အလုပ်လုပ်ရန် လိုအပ်သော ဖိုင်များ
 const urlsToCache = [
   '/',
