@@ -9,15 +9,20 @@
     <link rel="manifest" href="manifest.json">
 </head>
 <body>
-    <div id="activation-screen" style="display: none; /* Initially hidden */">
+    <div id="activation-screen" style="display: none;">
     <div class="modal-content">
         <h2>Application ကို Activate လုပ်ပါ</h2>
-        <p>ကျေးဇူးပြု၍ Activate PIN နံပါတ်ထည့်သွင်းပါ။</p>
         <input type="password" id="pin-input" placeholder="PIN နံပါတ်">
         <button id="activate-button">Activate လုပ်မည်</button>
+        <div id="hint-container" style="margin-top: 1.5rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
+            <p>သင်၏ Hint Code:</p>
+            <h3 id="hint-code"></h3>
+            <p style="font-size: 0.8rem; color: #777;">ဒီ Hint Code ကို Admin ထံသို့ ငွေလွှဲ Screenshot နှင့်အတူ ပေးပို့ပြီး PIN ရယူပါ။</p>
+        </div>
         <p id="activation-error" class="error-message"></p>
     </div>
 </div>
+
 
     <div id="config-screen" class="screen">
         <div class="container">
