@@ -1,5 +1,5 @@
 {
-  "name": "Exam Grader OMR",
+  "name": "Exam Answer Checker",
   "short_name": "OMR Grader",
   "description": "An OMR sheet grading application that can work offline.",
   "start_url": "index.html",
